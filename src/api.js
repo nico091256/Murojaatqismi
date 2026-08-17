@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const rawBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const rawBaseURL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://backendqismi.onrender.com/api' : 'http://localhost:5000/api');
 const API_BASE_URL = rawBaseURL.endsWith('/api') ? rawBaseURL : `${rawBaseURL.replace(/\/$/, '')}/api`;
 
 const api = axios.create({
