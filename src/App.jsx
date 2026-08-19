@@ -6,9 +6,9 @@ import {
   Moon, Sun, Headphones, Monitor, DoorOpen, Sparkles,
   Clock, ShieldCheck, WifiOff, Printer, PowerOff,
   Tv2, KeyRound, Layers, Wrench, Package, User,
-  Building2, Phone, Briefcase, Hash
+  Building2, Phone, Briefcase, Hash, Search, MessageSquare
 } from 'lucide-react';
-import { createProblem, checkHealth } from './api';
+import { createProblem, checkHealth, checkTicketStatus } from './api';
 import DynamicBackground from './components/DynamicBackground';
 import CyberText from './components/CyberText';
 
@@ -32,6 +32,7 @@ const ROOM_SUGGESTIONS = ['101', '102', '104', '201', '203', '204', '301', '305'
 const PC_SUGGESTIONS   = ['PC-01', 'PC-02', 'PC-03', 'PC-05', 'PC-07', 'PC-10', 'Laptop'];
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState('new'); // 'new' | 'check'
   const [selectedType, setSelectedType] = useState('');
   const [personalInfo, setPersonalInfo] = useState({
     lastName: '', firstName: '', middleName: '',
@@ -47,6 +48,12 @@ export default function App() {
   const [copied,       setCopied]       = useState(false);
   const [theme,        setTheme]        = useState(() => localStorage.getItem('portal_theme') || 'dark');
   const [serverOnline, setServerOnline] = useState(true);
+
+  // Status check states (#4)
+  const [searchTicket, setSearchTicket] = useState('');
+  const [checking, setChecking] = useState(false);
+  const [ticketResult, setTicketResult] = useState(null);
+  const [ticketError, setTicketError] = useState('');
 
   // Apply theme to html/root
   useEffect(() => {
@@ -167,6 +174,35 @@ export default function App() {
     setError('');
   };
 
+  // Check Ticket Handler (#4)
+  const handleCheckTicket = async (e) => {
+    e?.preventDefault();
+    if (!searchTicket.trim()) {
+      setTicketError('Ticket raqamini kiriting (masalan: TM-1001)');
+      return;
+    }
+
+    setChecking(true);
+    setTicketError('');
+    setTicketResult(null);
+
+    try {
+      const res = await checkTicketStatus(searchTicket.trim());
+      setTicketResult(res.data.problem);
+    } catch (err) {
+      setTicketError(err.response?.data?.message || "Bunday ticket topilmadi. Raqamni tekshirib qayta kiriting.");
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  const switchToCheck = (ticketNum) => {
+    setActiveTab('check');
+    setSearchTicket(ticketNum);
+    setTicketResult(null);
+    setTicketError('');
+  };
+
   const isTM = selectedType === 'Texnik muammo';
   const isJS = selectedType === "Jihoz so'rovi";
 
@@ -196,6 +232,24 @@ export default function App() {
             </div>
           </div>
           <div className="nav-actions">
+            {/* Tab switchers */}
+            <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.06)', padding: 3, borderRadius: 10, border: '1px solid var(--border)' }}>
+              <button 
+                className={`theme-toggle-btn ${activeTab === 'new' ? 'active-tab-btn' : ''}`}
+                onClick={() => setActiveTab('new')}
+                style={{ borderRadius: 8, fontSize: '0.8rem', padding: '6px 12px', width: 'auto', gap: 6, display: 'flex', alignItems: 'center', background: activeTab === 'new' ? 'var(--primary)' : 'transparent', color: activeTab === 'new' ? 'white' : 'var(--text-secondary)' }}
+              >
+                <Sparkles size={14} /> Murojaat
+              </button>
+              <button 
+                className={`theme-toggle-btn ${activeTab === 'check' ? 'active-tab-btn' : ''}`}
+                onClick={() => setActiveTab('check')}
+                style={{ borderRadius: 8, fontSize: '0.8rem', padding: '6px 12px', width: 'auto', gap: 6, display: 'flex', alignItems: 'center', background: activeTab === 'check' ? 'var(--primary)' : 'transparent', color: activeTab === 'check' ? 'white' : 'var(--text-secondary)' }}
+              >
+                <Search size={14} /> Holatni tekshirish
+              </button>
+            </div>
+
             <div className={`status-badge ${serverOnline ? 'online' : 'offline'}`} title={serverOnline ? "Server faol ishlamoqda" : "Server bilan aloqa uzilgan"}>
               <span className="status-dot"></span>
               {serverOnline ? "IT Tizim Faol" : "Oflayn rejim"}
@@ -209,8 +263,133 @@ export default function App() {
         <main className="main-content">
           <div className="content-grid">
 
-            {/* ════ MUVAFFAQIYAT EKRANI ════ */}
-            {submitted ? (
+            {/* ════ TICKET HOLATINI TEKSHIRISH (#4 TAB) ════ */}
+            {activeTab === 'check' ? (
+              <div className="form-card" style={{ maxWidth: 620, margin: '0 auto', width: '100%' }}>
+                <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                  <div style={{ width: 50, height: 50, borderRadius: '50%', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', display: 'grid', placeItems: 'center', margin: '0 auto 12px' }}>
+                    <Search size={24} color="#818cf8" />
+                  </div>
+                  <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
+                    Murojaat Holatini Tekshirish
+                  </h2>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                    Yuborilgan murojaatingiz chipta raqamini kiriting
+                  </p>
+                </div>
+
+                <form onSubmit={handleCheckTicket} style={{ marginBottom: 20 }}>
+                  <div className="form-group">
+                    <div className="input-wrapper">
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="Masalan: TM-1001 yoki JS-1002"
+                        value={searchTicket}
+                        onChange={(e) => { setSearchTicket(e.target.value); setTicketError(''); }}
+                        style={{ textTransform: 'uppercase', fontFamily: 'var(--font-mono)', fontSize: '1rem', letterSpacing: '0.05em' }}
+                        autoFocus
+                      />
+                      <Hash className="input-icon" size={18} />
+                    </div>
+                  </div>
+
+                  {ticketError && (
+                    <div className="error-banner" style={{ marginBottom: 14 }}>
+                      <AlertCircle size={16} />
+                      <span>{ticketError}</span>
+                    </div>
+                  )}
+
+                  <button type="submit" className="submit-btn" disabled={checking}>
+                    {checking ? (
+                      <><div className="btn-spinner"></div><span>Qidirilmoqda...</span></>
+                    ) : (
+                      <><Search size={18} /><span>Holatni ko'rish</span></>
+                    )}
+                  </button>
+                </form>
+
+                {/* Ticket Natijasi */}
+                {ticketResult && (
+                  <div style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 16,
+                    padding: 20,
+                  }}>
+                    {/* Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, borderBottom: '1px solid var(--border)', paddingBottom: 14, marginBottom: 16 }}>
+                      <div>
+                        <span style={{ fontSize: '1.2rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#818cf8' }}>
+                          {ticketResult.ticketNumber}
+                        </span>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                          {ticketResult.type}
+                        </div>
+                      </div>
+
+                      <span style={{
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        padding: '4px 12px',
+                        borderRadius: 20,
+                        background: ticketResult.status === 'RESOLVED' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
+                        color: ticketResult.status === 'RESOLVED' ? '#10b981' : '#f59e0b',
+                        border: ticketResult.status === 'RESOLVED' ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(245,158,11,0.3)',
+                      }}>
+                        {ticketResult.status === 'RESOLVED' ? '✅ Hal qilindi' : '🟡 Navbatda / Kutilmoqda'}
+                      </span>
+                    </div>
+
+                    {/* Tracker */}
+                    <div className="status-tracker" style={{ marginBottom: 16 }}>
+                      <div className="tracker-step completed">
+                        <div className="step-circle"><Check size={14} /></div>
+                        <span className="step-name">Yuborildi</span>
+                      </div>
+                      <div className={`tracker-step ${ticketResult.assignedUser ? 'completed' : ticketResult.status === 'RESOLVED' ? 'completed' : 'active'}`}>
+                        <div className="step-circle">{ticketResult.assignedUser || ticketResult.status === 'RESOLVED' ? <Check size={14} /> : '2'}</div>
+                        <span className="step-name">
+                          {ticketResult.assignedUser ? `Xodim: ${ticketResult.assignedUser.fullName}` : 'Ko`rilmoqda'}
+                        </span>
+                      </div>
+                      <div className={`tracker-step ${ticketResult.status === 'RESOLVED' ? 'completed' : ''}`}>
+                        <div className="step-circle">{ticketResult.status === 'RESOLVED' ? <Check size={14} /> : '3'}</div>
+                        <span className="step-name">Yakunlandi</span>
+                      </div>
+                    </div>
+
+                    {/* Resolve note */}
+                    {ticketResult.resolveNote && (
+                      <div style={{
+                        background: 'rgba(16,185,129,0.08)',
+                        border: '1px solid rgba(16,185,129,0.25)',
+                        borderRadius: 10,
+                        padding: '10px 14px',
+                        marginBottom: 14,
+                        fontSize: '0.85rem'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#34d399', fontWeight: 600, marginBottom: 4 }}>
+                          <MessageSquare size={14} /> IT Xizmati javobi / Yechim:
+                        </div>
+                        <div style={{ color: 'var(--text-primary)' }}>
+                          {ticketResult.resolveNote}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Details */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                      <div>👤 Yuboruvchi: <strong style={{ color: 'var(--text-primary)' }}>{ticketResult.lastName} {ticketResult.firstName}</strong></div>
+                      {ticketResult.room && <div>🚪 Xona: <strong style={{ color: 'var(--text-primary)' }}>{ticketResult.room}</strong></div>}
+                      {ticketResult.computer && <div>🖥️ Kompyuter: <strong style={{ color: 'var(--text-primary)' }}>{ticketResult.computer}</strong></div>}
+                      {ticketResult.requestedItem && <div>📦 Jihoz: <strong style={{ color: 'var(--text-primary)' }}>{ticketResult.requestedItem}</strong></div>}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : submitted ? (
               <div className="form-card">
                 <div className="success-container">
                   <div className="success-badge-icon"><CheckCircle2 size={42} /></div>
@@ -268,9 +447,16 @@ export default function App() {
                     )}
                   </div>
 
-                  <div className="success-actions">
+                  <div className="success-actions" style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
                     <button className="submit-btn" style={{ width: 'auto' }} onClick={handleReset}>
                       <RotateCcw size={16} /> Yangi murojaat yuborish
+                    </button>
+                    <button 
+                      className="submit-btn" 
+                      style={{ width: 'auto', background: 'rgba(99,102,241,0.2)', color: '#818cf8', border: '1px solid rgba(99,102,241,0.4)' }}
+                      onClick={() => switchToCheck(submitted.ticketNumber)}
+                    >
+                      <Search size={16} /> Holatini kuzatish
                     </button>
                   </div>
                 </div>

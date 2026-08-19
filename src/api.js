@@ -26,4 +26,9 @@ export const createProblem = (data) => {
   return api.post('/problems', data);
 };
 
+// Check ticket status by ticket number (#4)
+export const checkTicketStatus = (ticket) => {
+  return api.get(`/problems/check/${ticket}`);
+};
+
 export default api;
