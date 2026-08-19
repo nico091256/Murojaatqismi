@@ -1428,3 +1428,84 @@ body {
   color: var(--accent-emerald);
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
+
+/* ── Responsiv Grid Qoidalari ── */
+.form-grid-3,
+.personal-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 840px) {
+  .form-grid-3,
+  .personal-info-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 540px) {
+  .form-grid-3,
+  .personal-info-grid,
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Top Navbar & Tablar Responsivligi ── */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 12px 12px 32px;
+  }
+
+  .top-navbar {
+    border-radius: 18px;
+    padding: 14px 16px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .top-navbar .brand-logo {
+    justify-content: flex-start;
+  }
+
+  .nav-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 500px) {
+  .nav-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .nav-actions > div:first-child {
+    display: flex;
+    width: 100%;
+  }
+
+  .nav-actions > div:first-child button {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .status-badge {
+    justify-content: center;
+  }
+}
+
