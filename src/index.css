@@ -1450,7 +1450,7 @@ body {
   }
 }
 
-@media (max-width: 540px) {
+@media (max-width: 560px) {
   .form-grid-3,
   .personal-info-grid,
   .form-grid-2 {
@@ -1458,17 +1458,24 @@ body {
   }
 }
 
-/* ── Top Navbar & Tablar Responsivligi ── */
+/* ── Top Navbar & Mobile Responsivlik ── */
 @media (max-width: 768px) {
+  /* Prevent iOS zoom on inputs */
+  .form-input,
+  .form-textarea,
+  select.form-input {
+    font-size: 16px !important;
+  }
+
   .app-container {
-    padding: 12px 12px 32px;
+    padding: 10px 10px 36px;
   }
 
   .top-navbar {
-    border-radius: 18px;
-    padding: 14px 16px;
+    border-radius: 16px;
+    padding: 12px 14px;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     align-items: stretch;
   }
 
@@ -1481,16 +1488,85 @@ body {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    flex-wrap: wrap;
     gap: 8px;
+  }
+
+  .hero-section {
+    padding: 24px 8px 18px;
+  }
+
+  .hero-title {
+    font-size: clamp(1.4rem, 5.5vw, 2rem);
+    line-height: 1.25;
+  }
+
+  .hero-desc {
+    font-size: 0.88rem;
+  }
+
+  .form-card {
+    padding: 20px 14px;
+    border-radius: 18px;
+  }
+
+  .type-selector-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .type-card {
+    padding: 14px 16px;
+  }
+
+  .presets-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .preset-chip {
+    padding: 9px 12px;
+    font-size: 0.8rem;
+    min-height: 42px;
+  }
+
+  .field-suggestions {
+    gap: 5px;
+  }
+
+  .field-chip {
+    padding: 5px 9px;
+    font-size: 0.76rem;
+  }
+
+  .submit-btn {
+    padding: 14px 20px;
+    font-size: 0.98rem;
+    min-height: 48px;
+  }
+
+  .summary-card {
+    padding: 16px 14px;
+  }
+
+  .summary-meta-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .status-tracker {
+    gap: 6px;
+  }
+
+  .step-name {
+    font-size: 0.72rem;
   }
 }
 
-@media (max-width: 500px) {
+@media (max-width: 480px) {
   .nav-actions {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
+    gap: 8px;
   }
 
   .nav-actions > div:first-child {
@@ -1506,6 +1582,29 @@ body {
 
   .status-badge {
     justify-content: center;
+  }
+
+  .presets-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-pill {
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+  }
+
+  .ticket-pill .ticket-num {
+    font-size: 1.4rem;
+  }
+
+  .success-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .success-actions .submit-btn {
+    width: 100% !important;
   }
 }
 

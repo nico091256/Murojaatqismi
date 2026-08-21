@@ -11,6 +11,7 @@ import {
 import { createProblem, checkHealth, checkTicketStatus } from './api';
 import DynamicBackground from './components/DynamicBackground';
 import CyberText from './components/CyberText';
+import Logo from './components/Logo';
 
 // Texnik muammo uchun tezkor shablonlar
 const ISSUE_PRESETS = [
@@ -225,7 +226,9 @@ export default function App() {
         {/* ── Navbar ── */}
         <header className="top-navbar">
           <div className="brand-logo">
-            <div className="logo-icon"><Headphones size={20} /></div>
+            <div className="logo-icon" style={{ background: 'rgba(247, 168, 56, 0.12)', border: '1px solid rgba(247, 168, 56, 0.3)' }}>
+              <Logo size={24} color="#F7A838" />
+            </div>
             <div>
               <div className="brand-title">IT Yordam Xizmati</div>
               <div className="brand-subtitle">Texnik muammolarni qabul qilish portali</div>
